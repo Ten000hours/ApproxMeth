@@ -928,6 +928,7 @@ class Trainer:
         """
         opt_model = self.model_wrapped if is_sagemaker_mp_enabled() else self.model
 
+
         if self.optimizer is None:
             decay_parameters = get_parameter_names(opt_model, [nn.LayerNorm])
             decay_parameters = [name for name in decay_parameters if "bias" not in name]

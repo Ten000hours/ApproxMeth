@@ -39,8 +39,8 @@ print(f"using model config: {config}")
 rank = sys.argv[1]
 os.environ["RANK"] = str(rank)
 os.environ["WORLD_SIZE"] = str(2)
-os.environ["MASTER_ADDR"] = "10.117.1.21"
-os.environ["MASTER_PORT"] = "29500"
+os.environ["MASTER_ADDR"] = "127.0.0.1"
+os.environ["MASTER_PORT"] = "29501"
 os.environ["RENDEZVOUS"] = "env://"
 
 crypten.init()
@@ -48,7 +48,8 @@ cfg.communicator.verbose = True
 
 # setup fake data for timing purpose
 commInit = crypten.communicator.get().get_communication_stats()
-input_ids = F.one_hot(torch.randint(low=0, high=config.vocab_size, size=(config.batch_size, config.sequence_length)), config.vocab_size).float().cuda()
+input_ids = F.one_hot(torch.randint(low=1, high=2, size=(config.batch_size, config.sequence_length)), config.vocab_size).float().cuda()
+# print(input_ids)
 
 timing = defaultdict(float)
 
@@ -59,6 +60,8 @@ model = encrypt_model(m, Bert, (config, timing), input_ids).eval()
 input_ids = encrypt_tensor(input_ids)
 
 for i in range(10):
+    # rank = comm.get().get_rank()
+    # crypten.print(f"\nRank {rank}:\n {input_ids}\n", in_order=True)
     m.reset_timing()
     time_s = time.time()
     # run a forward pass

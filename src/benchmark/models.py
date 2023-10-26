@@ -8,7 +8,7 @@ import crypten
 import crypten.nn as cnn
 import crypten.communicator as comm
 
-from utils import softmax_2RELU, activation_quad
+from utils import softmax_2RELU, activation_quad, softmax_2QUAD
 
 class Bert(cnn.Module):
     def __init__(self, config, timing):
@@ -45,7 +45,7 @@ class BertEmbeddings(cnn.Module):
         self.moduleList.append(cnn.Linear(self.lastTokenDim, config.hidden_size))
 
         self.position_embeddings = cnn.Linear(config.max_position_embeddings, config.hidden_size)
-        print(config.hidden_size)
+        # print(config.hidden_size)
         self.LayerNorm = cnn.BatchNorm2d(config.hidden_size, eps=config.layer_norm_eps)
         self.dropout = cnn.Dropout(config.hidden_dropout_prob)
         self.config = config
@@ -98,15 +98,18 @@ class BertEmbeddings(cnn.Module):
         embeddings += position_embeddings
 
         t0 = time.time()
-        comm0 = comm.get().get_communication_stats()
         orig_size = embeddings.size()
         embeddings = embeddings.view(-1, self.config.hidden_size)
+        # print("before layernorm: ", embeddings)
+        comm0 = comm.get().get_communication_stats()
         embeddings = self.LayerNorm(embeddings).view(orig_size)
-        t1 = time.time()
         comm1 = comm.get().get_communication_stats()
+        # print("after layernorm: ", embeddings)
+        t1 = time.time()
         self.timing["NormTime"] += (t1-t0)
         self.timing["NormCommTime"] += (comm1["time"] - comm0["time"])
         self.timing["NormCommByte"] += (comm1["bytes"] - comm0["bytes"])
+        # print("norm comm byte", comm1["bytes"] - comm0["bytes"])
         embeddings = self.dropout(embeddings)
         return embeddings
 
@@ -117,7 +120,7 @@ class BertLayer(cnn.Module):
         self.attention = BertAttention(config, timing)
         self.intermediate = BertIntermediate(config, timing)
         self.output = BertOutput(config, timing)
-        self.config = config
+        # self.config = config
  
     def forward(self, hidden_states):
         attention_output = self.attention(hidden_states)

@@ -598,7 +598,7 @@ def compute_metrics(task_name, preds, labels):
         return {"acc": simple_accuracy(preds, labels)}
     elif task_name == "mrpc":
         return acc_and_f1(preds, labels)
-    elif task_name == "stsb":
+    elif task_name == "sts-b":
         return pearson_and_spearman(preds, labels)
     elif task_name == "qqp":
         return acc_and_f1(preds, labels)
@@ -804,7 +804,7 @@ def main():
         "mnli-mm": MnliMismatchedProcessor,
         "mrpc": MrpcProcessor,
         "sst2": Sst2Processor,
-        "stsb": StsbProcessor,
+        "sts-b": StsbProcessor,
         "qqp": QqpProcessor,
         "qnli": QnliProcessor,
         "rte": RteProcessor,
@@ -817,7 +817,7 @@ def main():
         "mnli": "classification",
         "mrpc": "classification",
         "sst2": "classification",
-        "stsb": "regression",
+        "sts-b": "regression",
         "qqp": "classification",
         "qnli": "classification",
         "rte": "classification",
@@ -832,7 +832,7 @@ def main():
         "mnli": {"num_train_epochs": 5, "max_seq_length": 128},
         "mrpc": {"num_train_epochs": 20, "max_seq_length": 128},
         "sst2": {"num_train_epochs": 10, "max_seq_length": 128},
-        "stsb": {"num_train_epochs": 100, "max_seq_length": 128},
+        "sts-b": {"num_train_epochs": 100, "max_seq_length": 128},
         "qqp": {"num_train_epochs": 5, "max_seq_length": 128},
         "qnli": {"num_train_epochs": 10, "max_seq_length": 128},
         "rte": {"num_train_epochs": 50, "max_seq_length": 128},
@@ -840,7 +840,7 @@ def main():
     }
 
     acc_tasks = ["mnli", "mrpc", "sst2", "qqp", "qnli", "rte", "imdb"]
-    corr_tasks = ["stsb"]
+    corr_tasks = ["sts-b"]
     mcc_tasks = ["cola"]
 
     # Prepare devices

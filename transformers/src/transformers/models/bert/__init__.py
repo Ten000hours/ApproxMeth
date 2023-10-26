@@ -16,6 +16,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# import sys
+# module_directory = '/cis/home/zwang/yuanzhong/MPCFormer/transformers/src/transformers/models/bert'
+# sys.path.append(module_directory)
+# import ctypes
+# fastrsqrtcpp = ctypes.CDLL("fastrsqrtcpp.cpython-38-x86_64-linux-gnu.so")
+
+# from fastrsqrtcpp import *
 from typing import TYPE_CHECKING
 
 from ...utils import (

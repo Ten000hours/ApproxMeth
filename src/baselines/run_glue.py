@@ -67,6 +67,7 @@ task_to_keys = {
     "sst2": ("sentence", None),
     "stsb": ("sentence1", "sentence2"),
     "wnli": ("sentence1", "sentence2"),
+    "imdb": ("sentence", None),
 }
 
 logger = logging.getLogger(__name__)
@@ -379,7 +380,7 @@ def main():
     )
     config.hidden_act = model_args.act
     config.softmax_act = model_args.softmax_act
-    print(f"using model config: {config}")
+    # print(f"using model config: {config}")
 
     if data_args.scratch:
         model = AutoModelForSequenceClassification.from_config(
@@ -396,7 +397,7 @@ def main():
                 use_auth_token=True if model_args.use_auth_token else None,
                 ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
         )
-    print(f"model architecture: {model}")
+    # print(f"model architecture: {model}")
     if data_args.task_name is not None:
         sentence1_key, sentence2_key = task_to_keys[data_args.task_name]
     else:
@@ -584,9 +585,13 @@ def main():
             combined = {}
 
         for eval_dataset, task in zip(eval_datasets, tasks):
+            # print("eval_dataset", eval_dataset)
             try:
                 metrics = trainer.evaluate(eval_dataset=eval_dataset)
-            except:
+                # print("metrics", metrics)
+            except Exception as e:
+                print(e)
+                sys.exit("nan or inf value")
                 metrics = 0
             max_eval_samples = (
                 data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)

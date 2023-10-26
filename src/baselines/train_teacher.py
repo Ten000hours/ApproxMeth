@@ -32,7 +32,7 @@ log_path = os.path.join(base_dir, "log.txt")
 with open(log_path, "a") as f:
     f.write("new run \n")
 
-num_devices = torch.cuda.device_count()
+num_devices = torch.cuda.device_count() 
 
 def HPO_teacher_bert():
     lr_list = [2e-5, 3e-5, 4e-5, 5e-5]
@@ -42,9 +42,9 @@ def HPO_teacher_bert():
     for lr in lr_list:
         output_dir = os.path.join(base_dir, str(lr))
         result_path = os.path.join(output_dir, "eval_results.json")
-        cmd = f"python run_glue.py --model_name_or_path bert-base-uncased --task_name {task_name} \
-              --do_train --do_eval --max_seq_length 128 --per_device_train_batch_size {bs} --learning_rate {str(lr)} \
-              --num_train_epochs 3 --save_steps 200 --act gelu --softmax_act softmax --output_dir {output_dir} --overwrite_output_dir"
+        cmd = f"python ~/yuanzhong/MPCFormer/src/baselines/run_glue.py --model_name_or_path bert-base-uncased --task_name {task_name} \
+              --do_train --do_eval  --max_seq_length 128 --per_device_train_batch_size {bs} --learning_rate {str(lr)} \
+              --num_train_epochs 4 --save_steps 200 --act gelu --softmax_act softmax --output_dir {output_dir} --overwrite_output_dir"
         subprocess.run(cmd, shell=True)
         result = json.load(open(result_path))
         acc = float(result[metric_name])

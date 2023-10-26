@@ -119,7 +119,7 @@ def parse_args():
     parser.add_argument(
         "--softmax_act",
         type=str,
-        help="softmax act of the student model",
+        help="softmax act of the student model",)
     parser.add_argument(
         "--per_device_eval_batch_size",
         type=int,

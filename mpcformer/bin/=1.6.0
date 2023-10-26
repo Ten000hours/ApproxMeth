@@ -1,0 +1,19 @@
+Collecting Crypten
+  Using cached crypten-0.4.1-py3-none-any.whl (259 kB)
+Collecting install
+  Using cached install-1.3.5-py3-none-any.whl (3.2 kB)
+Requirement already satisfied: torch in /cis/home/zwang/yuanzhong/MPCFormer/mpcformer/lib/python3.8/site-packages (2.0.1)
+Collecting torchvision
+  Using cached torchvision-0.15.2-cp38-cp38-manylinux1_x86_64.whl (33.8 MB)
+Collecting omegaconf
+  Using cached omegaconf-2.3.0-py3-none-any.whl (79 kB)
+Collecting onnx
+  Using cached onnx-1.14.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (14.6 MB)
+Requirement already satisfied: pandas in /cis/home/zwang/yuanzhong/MPCFormer/mpcformer/lib/python3.8/site-packages (2.0.3)
+Requirement already satisfied: pyyaml in /cis/home/zwang/yuanzhong/MPCFormer/mpcformer/lib/python3.8/site-packages (6.0.1)
+Collecting tensorboard
+  Using cached tensorboard-2.14.0-py3-none-any.whl (5.5 MB)
+Processing /cis/home/zwang/.cache/pip/wheels/a0/0b/ee/e6994fadb42c1354dcccb139b0bf2795271bddfe6253ccdf11/future-0.18.3-py3-none-any.whl
+Requirement already satisfied: scipy in /cis/home/zwang/yuanzhong/MPCFormer/mpcformer/lib/python3.8/site-packages (1.10.1)
+Installing collected packages: Crypten, install, torchvision, omegaconf, onnx, tensorboard, future
+Successfully installed Crypten-0.4.1 future-0.18.3 install-1.3.5 omegaconf-2.3.0 onnx-1.14.1 tensorboard-2.14.0 torchvision-0.15.2

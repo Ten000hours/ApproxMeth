@@ -15,6 +15,11 @@
 # limitations under the License.
 """PyTorch BERT model."""
 
+# import sys
+# module_directory = '/cis/home/zwang/yuanzhong/MPCFormer/transformers/src/transformers'
+# sys.path.append(module_directory)
+
+# import fastrsqrt_cpp
 
 import math
 import os
@@ -178,7 +183,21 @@ def load_tf_weights_in_bert(model, config, tf_checkpoint_path):
         pointer.data = torch.from_numpy(array)
     return model
 
+# class BertLayerNorm(nn.Module):
+#     def __init__(self, hidden_size, eps=1e-12):
+#         """Construct a layernorm module in the TF style (epsilon inside the square root).
+#         """
+#         super(BertLayerNorm, self).__init__()
+#         self.weight = nn.Parameter(torch.ones(hidden_size))
+#         self.bias = nn.Parameter(torch.zeros(hidden_size))
+#         self.variance_epsilon = eps
 
+#     def forward(self, x):
+#         u = x.mean(-1, keepdim=True)
+#         s = (x - u).pow(2).mean(-1, keepdim=True)
+#         x = (x - u)* fastrsqrt_cpp.fastrsqrt2PC(s + self.variance_epsilon)
+#         return self.weight * x + self.bias
+        
 class BertEmbeddings(nn.Module):
     """Construct the embeddings from word, position and token_type embeddings."""
 
@@ -403,6 +422,7 @@ class BertSelfOutput(nn.Module):
         super().__init__()
         self.dense = nn.Linear(config.hidden_size, config.hidden_size)
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        # self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, hidden_states: torch.Tensor, input_tensor: torch.Tensor) -> torch.Tensor:
@@ -481,6 +501,7 @@ class BertOutput(nn.Module):
         super().__init__()
         self.dense = nn.Linear(config.intermediate_size, config.hidden_size)
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        # self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
 
     def forward(self, hidden_states: torch.Tensor, input_tensor: torch.Tensor) -> torch.Tensor:
@@ -697,6 +718,7 @@ class BertPredictionHeadTransform(nn.Module):
         else:
             self.transform_act_fn = config.hidden_act
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        # self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         hidden_states = self.dense(hidden_states)

@@ -16,6 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# import sys
+# module_directory = '/cis/home/zwang/yuanzhong/MPCFormer/transformers/src/transformers/models/bert'
+# sys.path.append(module_directory)
+
+# from fastrsqrtcpp import *
 from . import (
     albert,
     auto,

@@ -17,6 +17,11 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import sys
+module_directory = '/cis/home/zwang/yuanzhong/MPCFormer/transformers/src/transformers'
+sys.path.append(module_directory)
+
+import fastrsqrt_cpp
 import copy
 import json
 import logging
@@ -132,12 +137,36 @@ def gelu(x):
     """
     return x * 0.5 * (1.0 + torch.erf(x / math.sqrt(2.0)))
 
+from ctypes import c_float, c_int32, cast, byref, POINTER
+
+def ctypes_isqrt(number):
+    threehalfs = 1.5
+    x2 = number * 0.5
+    for dim in number:
+        for word_len in dim:
+            print("inner transformer")
+            for elem in word_len:
+                # print("elem tensor:", elem)
+                # elem_cpu = elem.to("cpu")
+                y = c_float(elem.item())
+
+                i = cast(byref(y), POINTER(c_int32)).contents.value
+                i = c_int32(0x5f3759df - (i >> 1))
+                y = cast(byref(i), POINTER(c_float)).contents.value
+
+                y = y * (1.5 - (0.5*elem.item() * y * y))
+                number = torch.where(number==elem.item(), y, number)
+    return number
+
 
 def swish(x):
     return x * torch.sigmoid(x)
 
 def quad(x):
     return 0.125*torch.square(x) + 0.25*x + 0.5
+
+def softmax2approx(x, hasNewton):
+    pass
 
 def softmax(scores, dim):
     return torch.nn.functional.softmax(scores, dim)
@@ -151,6 +180,9 @@ def softmax_2relu(scores, dim, eps=1e-12):
 def softmax_2linear(scores, dim):
     out = scores / (torch.sum(scores, dim=dim, keepdims=True))
     return out
+# def softmax_fastexp(scores, dim):
+#     out = scores / (fastrsqrt_cpp.Fastexp2PC(scores, dim=dim, keepdims=True))
+#     return out
 
 def softmax_2quad(scores, attention_mask_zero_one, dim):
     scores =  (scores + 5) ** 2
@@ -158,6 +190,20 @@ def softmax_2quad(scores, attention_mask_zero_one, dim):
     scores = scores / torch.sum(scores, dim=dim, keepdims=True)
     return scores
 
+# def smu1(x):
+#     return ((1)*x+torch.square(x)+torch.square(0.4)*ctypes_isqrt(torch.square(x)+torch.square(0.4)))/2
+
+class TrainLearnableAlphaGeLU1(nn.Module):
+    def __init__(self, word_length):
+        super(TrainLearnableAlphaGeLU1, self).__init__()
+        self.alphas = nn.Parameter(torch.full((1, word_length), 0.0), requires_grad=False)
+        self.mu = nn.Parameter(torch.full((1, word_length), 0.363), requires_grad=True)
+
+    def forward(self, x):
+        # print("alphas: ",1-self.alphas.expand_as(x))
+        # out = F.relu(x) * self.alphas.expand_as(x) + (1-self.alphas.expand_as(x)) * x 
+        # out = ((1+self.alphas.expand_as(x)) * x +  torch.sqrt(self.mu.expand_as(x) * (1-self.alphas.expand_as(x) * x)))/2
+        return ((1+self.alphas)*x+torch.sqrt(torch.square(x-self.alphas*x)+torch.square(self.mu)))/2
 try:
     from apex.normalization.fused_layer_norm import FusedLayerNorm as BertLayerNorm
 except ImportError:
@@ -176,11 +222,26 @@ except ImportError:
         def forward(self, x):
             u = x.mean(-1, keepdim=True)
             s = (x - u).pow(2).mean(-1, keepdim=True)
-            x = (x - u) / torch.sqrt(s + self.variance_epsilon)
+            x = (x - u)* fastrsqrt_cpp.fastrsqrt2PC(s + self.variance_epsilon)
             return self.weight * x + self.bias
 
+# GeLU approximation is from the paper: 
+# Smooth Maximum Unit: Smooth Activation Function for Deep Networks using Smoothing Maximum Technique
+# https://openaccess.thecvf.com/content/CVPR2022/papers/Biswas_Smooth_Maximum_Unit_Smooth_Activation_Function_for_Deep_Networks_Using_CVPR_2022_paper.pdf
+    # class LearnableAlphaGeLU1(nn.Module):
+    #     def __init__(self, word_length):
+    #         super(LearnableAlphaGeLU1, self).__init__()
+    #         self.alphas = nn.Parameter(torch.zeros(1, word_length), requires_grad=True)
+    #         self.mu = nn.Parameter(torch.full((1, word_length), 1/math.sqrt(2)), requires_grad=True)
 
-ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "quad": quad}
+    #     def forward(self, x):
+    #         # print("alphas: ",1-self.alphas.expand_as(x))
+    #         # out = F.relu(x) * self.alphas.expand_as(x) + (1-self.alphas.expand_as(x)) * x 
+    #         # out = ((1+self.alphas.expand_as(x)) * x +  torch.sqrt(self.mu.expand_as(x) * (1-self.alphas.expand_as(x) * x)))/2
+    #         return ((1+self.alphas)*x+torch.square(x-self.alphas*x)+torch.square(self.mu)*ctypes_isqrt(torch.square(x-self.alphas*x)+torch.square(self.mu)))/2
+    #         # return out
+
+ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "quad": quad, "smu1_train": TrainLearnableAlphaGeLU1(3072)}
 ACT2SFN = {
     "softmax": softmax,
     "2relu": softmax_2relu,
