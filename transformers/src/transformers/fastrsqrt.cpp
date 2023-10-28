@@ -221,7 +221,7 @@ torch::Tensor rSqrtMod(torch::Tensor input) {
         int temp = abs(i1 + i2);
         float x = *(float*)(&temp);
         float inital_approxi = x;
-        for(int64_t j =0; j< 1; ++j)
+        for(int64_t j =0; j< 2; ++j)
         {
             // x = x*(1.5f - fmod(x1+x2, 1.9001)*0.5f * pow(x,2));
             x = x*(1.5f - 0.5f *(input_value) * x * x);
