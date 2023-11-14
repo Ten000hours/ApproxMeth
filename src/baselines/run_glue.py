@@ -18,6 +18,7 @@
 
 import logging
 import os
+import matplotlib.pyplot as plt
 import random
 import sys
 from dataclasses import dataclass, field
@@ -571,6 +572,24 @@ def main():
         trainer.save_metrics("train", metrics)
         trainer.save_state()
 
+    # Define a function to capture intermediate activations
+    activations = []
+
+    def get_activation(name):
+        def hook(best_model, input, output):
+            activations.append(output.detach()) 
+        return hook
+
+    print(model)
+    # Register hooks for intermediate layers
+    type = "layernorm"
+    layer_names = "transformer.blocks.1.attention.layernorm"
+    # layer_names_list = layer_names.split('.')
+    # for layer_name in layer_names_list:
+    #     layer = best_model._modules[layer_name]
+    # layer = model.bert.encoder.layer[6].attention.output.dense
+    layer = model.bert.encoder.layer[11].intermediate.dense
+    layer.register_forward_hook(get_activation(layer_names))
     #print(model.bert.embeddings.word_embeddings.weight)
     # Evaluation
     if training_args.do_eval:
@@ -633,6 +652,22 @@ def main():
                         else:
                             item = label_list[item]
                             writer.write(f"{index}\t{item}\n")
+
+    # Now, activation_values dictionary contains intermediate activations
+    # layer_name = "transformer.blocks.0.attention.joint_linear.weight"
+    # activations = activation_values[0]
+
+    # Reshape activations to a 1D array
+    activation_values_flat = activations[0].to("cpu").view(-1).numpy()
+
+    # Create a histogram
+    plt.hist(activation_values_flat, bins=100, density=True)
+    plt.xlabel("Activation Value")
+    plt.ylabel("Frequency")
+    plt.title(f"Activation Value Distribution layer 11 before GELU(RTE)")
+    plt.savefig("activation distribution")
+    plt.show()
+
 
     kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": "text-classification"}
     if data_args.task_name is not None:

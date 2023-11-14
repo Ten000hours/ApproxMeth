@@ -1,5 +1,6 @@
 import math
 import torch
+from torch import Tensor, nn
 
 import crypten
 import crypten.communicator as comm
@@ -79,6 +80,40 @@ class activation_newGeLU(cnn.Module):
 
     def forward(self, x):
         return self.half * x * (self.one + self.tanh(self.pi_const * (x + self.constant * self.pow((x, self.three)))))
+
+class TrainLearnableAlphaGeLU1(cnn.Module):
+    def __init__(self, word_length):
+        super(TrainLearnableAlphaGeLU1, self).__init__()
+        self.alphas = nn.Parameter(torch.full((1, word_length), 0.000001), requires_grad=False)
+        self.mu = nn.Parameter(torch.full((1, word_length), 0.363), requires_grad=False)
+
+    def forward(self, x):
+        # print("alphas: ",1-self.alphas.expand_as(x))
+        # out = F.relu(x) * self.alphas.expand_as(x) + (1-self.alphas.expand_as(x)) * x 
+        # out = ((1+self.alphas.expand_as(x)) * x +  torch.sqrt(self.mu.expand_as(x) * (1-self.alphas.expand_as(x) * x)))/2
+        return ((1+self.alphas)*x+(torch.square(x-self.alphas*x)+torch.square(self.mu))*(1/torch.sqrt(torch.square(x-self.alphas*x)+torch.square(self.mu))))/2
+        # return out
+        # return ((1)*x+torch.square(x)+torch.square(0.4)*ctypes_isqrt(torch.square(x)+torch.square(0.4)))/2
+class InferLearnableAlphaGeLU1(cnn.Module):
+    def __init__(self, word_length):
+        super(InferLearnableAlphaGeLU1, self).__init__()
+        self.alphas = torch.tensor(0.000001).item()
+        self.mu =torch.tensor(0.363).item()
+        self.mut =torch.tensor(0.363)
+        self.two = torch.tensor([2.0]).item()
+        self.pow = cnn.Pow()
+        self.inv_sqrt = cnn.inv_Sqrt()
+
+    def forward(self, x):
+        # print("alphas: ",1-self.alphas.expand_as(x))
+        # out = F.relu(x) * self.alphas.expand_as(x) + (1-self.alphas.expand_as(x)) * x 
+        # out = ((1+self.alphas.expand_as(x)) * x +  torch.sqrt(self.mu.expand_as(x) * (1-self.alphas.expand_as(x) * x)))/2
+        # x = x.to("cpu")
+        # return (((1 + self.alphas) * x) + fastrsqrt_cpp.fastrsqrt(torch.square(x - self.alphas * x) + torch.square(self.mu))) / 2
+        out = ((1-self.alphas) * self.pow((x,self.two)))+ torch.square(self.mut)
+        return (((1 + self.alphas)* x) + (out)* self.inv_sqrt(out)) / 2
+        # return out
+        # return ((1)*x+torch.square(x)+torch.square(0.4)*ctypes_isqrt(torch.square(x)+torch.square(0.4)))/2
 
 
 class activation_quad(cnn.Module):

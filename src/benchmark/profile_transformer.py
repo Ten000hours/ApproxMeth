@@ -24,7 +24,7 @@ class config():
        self.intermediate_size = 3072
        self.sequence_length = 512
        self.max_position_embeddings = 512
-       self.hidden_act = "quad"
+       self.hidden_act = "gelu"
        self.softmax_act = "softmax_2RELU"
        self.layer_norm_eps = 1e-12
        self.num_attention_heads = 12

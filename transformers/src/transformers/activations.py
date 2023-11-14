@@ -132,7 +132,7 @@ class InferLearnableAlphaGeLU1(nn.Module):
         # out = ((1+self.alphas.expand_as(x)) * x +  torch.sqrt(self.mu.expand_as(x) * (1-self.alphas.expand_as(x) * x)))/2
         # x = x.to("cpu")
         # return (((1 + self.alphas) * x) + fastrsqrt_cpp.fastrsqrt(torch.square(x - self.alphas * x) + torch.square(self.mu))) / 2
-        return ((1 + self.alphas) * x + (torch.square(x - self.alphas * x) + torch.square(self.mu)) * fastrsqrt_cpp.fastrsqrt2PC((1-self.alphas)*torch.square(x) + torch.square(self.mu))) / 2
+        return ((1 + self.alphas) * x + ((1-self.alphas)*torch.square(x) + torch.square(self.mu))* fastrsqrt_cpp.fastrsqrt2PC((1-self.alphas)*torch.square(x) + torch.square(self.mu))) / 2
         # return out
         # return ((1)*x+torch.square(x)+torch.square(0.4)*ctypes_isqrt(torch.square(x)+torch.square(0.4)))/2
 
@@ -235,7 +235,7 @@ ACT2FN = {
 ACT2SFN = {
     "softmax": torch.nn.functional.softmax,
     "2relu": softmax_2relu,
-    "fastexp": softmax_fastexp,
+    # "fastexp": softmax_fastexp,
     "2quad": softmax_2quad,
 }
 

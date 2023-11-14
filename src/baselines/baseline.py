@@ -73,7 +73,7 @@ for lr in lr_list:
             output_dir = os.path.join(base_dir, f"HPO_{baseline_type}" ,str(lr), str(bs), str(epoch))
             result_path = os.path.join(output_dir, "eval_results.json")
             cmd = f"python ~/yuanzhong/MPCFormer/src/baselines/run_glue.py --model_name_or_path {model_path} \
-                   --fp16   --do_eval --max_seq_length {max_seq_length} \
+                   --fp16 --do_train  --do_eval --max_seq_length {max_seq_length} \
                   --warmup_ratio 0.2 --per_device_train_batch_size {str(bs//num_devices)} --learning_rate {str(lr)} \
                   --num_train_epochs {epoch} --act {hidden_act} --softmax_act {softmax_act} --output_dir {output_dir} --overwrite_output_dir"
             if baseline_type == "S0":

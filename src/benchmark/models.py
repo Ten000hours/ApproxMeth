@@ -8,7 +8,7 @@ import crypten
 import crypten.nn as cnn
 import crypten.communicator as comm
 
-from utils import softmax_2RELU, activation_quad, softmax_2QUAD
+from utils import activation_newGeLU, InferLearnableAlphaGeLU1, softmax_2RELU, activation_quad, softmax_2QUAD
 
 class Bert(cnn.Module):
     def __init__(self, config, timing):
@@ -253,6 +253,10 @@ class BertIntermediate(cnn.Module):
             self.intermediate_act_fn = cnn.ReLU()
         elif config.hidden_act == "quad":
             self.intermediate_act_fn = activation_quad()
+        elif config.hidden_act == "smu_infer":
+            self.intermediate_act_fn = InferLearnableAlphaGeLU1(3072)
+        elif config.hidden_act == "gelu":
+            self.intermediate_act_fn = activation_newGeLU()
         else:
             raise ValueError(f"activation type {config.hidden_act} not implemented")
         self.timing = timing

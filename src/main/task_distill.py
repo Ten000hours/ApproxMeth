@@ -594,7 +594,7 @@ def compute_metrics(task_name, preds, labels):
     assert len(preds) == len(labels)
     if task_name == "cola":
         return {"mcc": matthews_corrcoef(labels, preds)}
-    elif task_name == "sst2":
+    elif task_name == "sst-2":
         return {"acc": simple_accuracy(preds, labels)}
     elif task_name == "mrpc":
         return acc_and_f1(preds, labels)
@@ -803,7 +803,7 @@ def main():
         "mnli": MnliProcessor,
         "mnli-mm": MnliMismatchedProcessor,
         "mrpc": MrpcProcessor,
-        "sst2": Sst2Processor,
+        "sst-2": Sst2Processor,
         "sts-b": StsbProcessor,
         "qqp": QqpProcessor,
         "qnli": QnliProcessor,
@@ -816,7 +816,7 @@ def main():
         "cola": "classification",
         "mnli": "classification",
         "mrpc": "classification",
-        "sst2": "classification",
+        "sst-2": "classification",
         "sts-b": "regression",
         "qqp": "classification",
         "qnli": "classification",
@@ -831,7 +831,7 @@ def main():
         "cola": {"num_train_epochs": 50, "max_seq_length": 128},
         "mnli": {"num_train_epochs": 5, "max_seq_length": 128},
         "mrpc": {"num_train_epochs": 20, "max_seq_length": 128},
-        "sst2": {"num_train_epochs": 10, "max_seq_length": 128},
+        "sst-2": {"num_train_epochs": 10, "max_seq_length": 128},
         "sts-b": {"num_train_epochs": 100, "max_seq_length": 128},
         "qqp": {"num_train_epochs": 5, "max_seq_length": 128},
         "qnli": {"num_train_epochs": 10, "max_seq_length": 128},
@@ -839,7 +839,7 @@ def main():
         "imdb": {"num_train_epochs": 30, "max_seq_length": 512},
     }
 
-    acc_tasks = ["mnli", "mrpc", "sst2", "qqp", "qnli", "rte", "imdb"]
+    acc_tasks = ["mnli", "mrpc", "sst-2", "qqp", "qnli", "rte", "imdb"]
     corr_tasks = ["sts-b"]
     mcc_tasks = ["cola"]
 

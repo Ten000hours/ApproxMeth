@@ -222,7 +222,8 @@ except ImportError:
         def forward(self, x):
             u = x.mean(-1, keepdim=True)
             s = (x - u).pow(2).mean(-1, keepdim=True)
-            x = (x - u)* fastrsqrt_cpp.fastrsqrt2PC(s + self.variance_epsilon)
+            # x = (x - u)* fastrsqrt_cpp.fastrsqrt2PC(s + self.variance_epsilon)
+            x = (x - u)/torch.sqrt(s + self.variance_epsilon)
             return self.weight * x + self.bias
 
 # GeLU approximation is from the paper: 
